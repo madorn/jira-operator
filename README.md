@@ -1,4 +1,4 @@
-# jira-operator
+# Jira Operator
 
 A Kubernetes operator to manage JIRA instances.
 
