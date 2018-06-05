@@ -13,30 +13,31 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func NewHandler() sdk.Handler {
-	return &Handler{}
+func NewJiraHandler() sdk.Handler {
+	return &JiraHandler{}
 }
 
-type Handler struct {
+type JiraHandler struct {
 	// Fill me
 }
 
-func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
+func (h *JiraHandler) Handle(ctx context.Context, event sdk.Event) error {
 	switch o := event.Object.(type) {
 	case *v1alpha1.Jira:
-		err := sdk.Create(newbusyBoxPod(o))
+		err := sdk.Create(newJiraPod(o))
 		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("Failed to create busybox pod : %v", err)
+			logrus.Errorf("Failed to create jira pod : %v", err)
 			return err
 		}
 	}
 	return nil
 }
 
-// newbusyBoxPod demonstrates how to create a busybox pod
-func newbusyBoxPod(cr *v1alpha1.Jira) *v1.Pod {
+// newJiraPod will create a jira pod
+func newJiraPod(cr *v1alpha1.Jira) *v1.Pod {
 	labels := map[string]string{
-		"app": "busy-box",
+		"app":     "jira",
+		"cluster": cr.Name,
 	}
 	return &v1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -44,7 +45,7 @@ func newbusyBoxPod(cr *v1alpha1.Jira) *v1.Pod {
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "busy-box",
+			Name:      cr.Name,
 			Namespace: cr.Namespace,
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(cr, schema.GroupVersionKind{
@@ -58,9 +59,8 @@ func newbusyBoxPod(cr *v1alpha1.Jira) *v1.Pod {
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{
 				{
-					Name:    "busybox",
-					Image:   "busybox",
-					Command: []string{"sleep", "3600"},
+					Name:  "jira",
+					Image: "cptactionhank/atlassian-jira:7.10.0",
 				},
 			},
 		},
