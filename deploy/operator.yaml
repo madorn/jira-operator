@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jira-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jira-operator
+  template:
+    metadata:
+      labels:
+        name: jira-operator
+    spec:
+      containers:
+        - name: jira-operator
+          image: jmckind/jira-operator
+          command:
+          - jira-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
