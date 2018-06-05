@@ -1,6 +1,38 @@
 # jira-operator
 
-A Kubernetes operator to manage JIRA instances. 
+A Kubernetes operator to manage JIRA instances.
+
+## Overview
+
+This operator will deploy Jira...
+
+## Usage
+
+Deploy the operator and required resources.
+
+```
+kubectl apply -f deploy
+```
+
+Deploy a new Jira instance.
+
+```
+kubectl apply -f examples/jira-minimal.yaml
+```
+
+## Development
+
+Build the operator using the SDK.
+
+```
+operator-sdk build jmckind/jira-operator
+```
+
+Push the new operator image to the remote repository.
+
+```
+docker push jmckind/jira-operator
+```
 
 ## License
 
