@@ -24,22 +24,35 @@ type JiraHandler struct {
 func (h *JiraHandler) Handle(ctx context.Context, event sdk.Event) error {
 	switch o := event.Object.(type) {
 	case *v1alpha1.Jira:
-		err := sdk.Create(newJiraPod(o))
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("Failed to create jira pod : %v", err)
+		err := handleJira(o)
+		if err != nil {
+			logrus.Errorf("Failed to handle jira: %v", err)
 			return err
 		}
 	}
 	return nil
 }
 
-// newJiraPod will create a jira pod
-func newJiraPod(cr *v1alpha1.Jira) *v1.Pod {
-	labels := map[string]string{
-		"app":     "jira",
-		"cluster": cr.Name,
+// handleJira will create the resources for the cluster
+func handleJira(cr *v1alpha1.Jira) error {
+	err := newJiraPod(cr)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		logrus.Errorf("Failed to create jira pod: %v", err)
+		return err
 	}
-	return &v1.Pod{
+
+	err = newJiraService(cr)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		logrus.Errorf("Failed to create jira service: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+// newJiraPod will create a jira pod
+func newJiraPod(cr *v1alpha1.Jira) error {
+	pod := &v1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",
 			APIVersion: "v1",
@@ -54,15 +67,66 @@ func newJiraPod(cr *v1alpha1.Jira) *v1.Pod {
 					Kind:    "Jira",
 				}),
 			},
-			Labels: labels,
+			Labels: labelsForCluster(cr),
 		},
 		Spec: v1.PodSpec{
-			Containers: []v1.Container{
-				{
-					Name:  "jira",
-					Image: "cptactionhank/atlassian-jira:7.10.0",
+			Containers: []v1.Container{{
+				Name:  "jira",
+				Image: "cptactionhank/atlassian-jira:7.10.0",
+				Ports: []v1.ContainerPort{{
+					ContainerPort: 8080,
+					Name:          "http",
 				},
+				},
+			},
 			},
 		},
 	}
+
+	return sdk.Create(pod)
+}
+
+// newJiraService will create a jira service
+func newJiraService(cr *v1alpha1.Jira) error {
+	svc := &v1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cr.Name,
+			Namespace: cr.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(cr, schema.GroupVersionKind{
+					Group:   v1alpha1.SchemeGroupVersion.Group,
+					Version: v1alpha1.SchemeGroupVersion.Version,
+					Kind:    "Jira",
+				}),
+			},
+			Labels: labelsForCluster(cr),
+		},
+		Spec: v1.ServiceSpec{
+			Selector:        labelsForCluster(cr),
+			SessionAffinity: "ClientIP",
+			Type:            "NodePort",
+			Ports:           portsForService(cr),
+		},
+	}
+
+	return sdk.Create(svc)
+}
+
+// labelsForCluster will create the labels for the cluster
+func labelsForCluster(cr *v1alpha1.Jira) map[string]string {
+	return map[string]string{
+		"app":     "jira",
+		"cluster": cr.Name,
+	}
+}
+
+func portsForService(cr *v1alpha1.Jira) []v1.ServicePort {
+	return []v1.ServicePort{{
+		Port: 8080,
+		Name: "http",
+	}}
 }
