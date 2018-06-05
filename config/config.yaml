@@ -1,0 +1,3 @@
+apiVersion: jira.atlassian.com/v1alpha1
+kind: Jira
+projectName: jira-operator
