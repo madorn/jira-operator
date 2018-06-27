@@ -138,6 +138,7 @@ func labelsForCluster(cr *v1alpha1.Jira) map[string]string {
 	}
 }
 
+// portsForService will create the ports for the jira service
 func portsForService(cr *v1alpha1.Jira) []v1.ServicePort {
 	return []v1.ServicePort{{
 		Port: 8080,
