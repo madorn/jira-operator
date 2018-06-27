@@ -49,7 +49,13 @@ func (h *JiraHandler) Handle(ctx context.Context, event sdk.Event) error {
 
 // handleJira will create the resources for the cluster
 func handleJira(cr *v1alpha1.Jira) error {
-	err := newJiraPod(cr)
+	err := newJiraConfigMap(cr)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		logrus.Errorf("Failed to create jira configmap: %v", err)
+		return err
+	}
+
+	err = newJiraPod(cr)
 	if err != nil && !errors.IsAlreadyExists(err) {
 		logrus.Errorf("Failed to create jira pod: %v", err)
 		return err
@@ -64,6 +70,24 @@ func handleJira(cr *v1alpha1.Jira) error {
 	return nil
 }
 
+// newJiraConfigMap will create a jira configmap
+func newJiraConfigMap(cr *v1alpha1.Jira) error {
+	configMap := &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            cr.Name,
+			Namespace:       cr.Namespace,
+			OwnerReferences: ownerForCluster(cr),
+			Labels:          labelsForCluster(cr),
+		},
+		Data: map[string]string{
+			"dbconfig.xml":           "",
+			"jira-config.properties": "",
+		},
+	}
+
+	return sdk.Create(configMap)
+}
+
 // newJiraPod will create a jira pod
 func newJiraPod(cr *v1alpha1.Jira) error {
 	pod := &v1.Pod{
@@ -72,16 +96,10 @@ func newJiraPod(cr *v1alpha1.Jira) error {
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name,
-			Namespace: cr.Namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(cr, schema.GroupVersionKind{
-					Group:   v1alpha1.SchemeGroupVersion.Group,
-					Version: v1alpha1.SchemeGroupVersion.Version,
-					Kind:    "Jira",
-				}),
-			},
-			Labels: labelsForCluster(cr),
+			Name:            cr.Name,
+			Namespace:       cr.Namespace,
+			OwnerReferences: ownerForCluster(cr),
+			Labels:          labelsForCluster(cr),
 		},
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{{
@@ -108,16 +126,10 @@ func newJiraService(cr *v1alpha1.Jira) error {
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name,
-			Namespace: cr.Namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(cr, schema.GroupVersionKind{
-					Group:   v1alpha1.SchemeGroupVersion.Group,
-					Version: v1alpha1.SchemeGroupVersion.Version,
-					Kind:    "Jira",
-				}),
-			},
-			Labels: labelsForCluster(cr),
+			Name:            cr.Name,
+			Namespace:       cr.Namespace,
+			OwnerReferences: ownerForCluster(cr),
+			Labels:          labelsForCluster(cr),
 		},
 		Spec: v1.ServiceSpec{
 			Selector:        labelsForCluster(cr),
@@ -135,6 +147,17 @@ func labelsForCluster(cr *v1alpha1.Jira) map[string]string {
 	return map[string]string{
 		"app":     "jira",
 		"cluster": cr.Name,
+	}
+}
+
+// ownerForCluster will create the owner references for the cluster
+func ownerForCluster(cr *v1alpha1.Jira) []metav1.OwnerReference {
+	return []metav1.OwnerReference{
+		*metav1.NewControllerRef(cr, schema.GroupVersionKind{
+			Group:   v1alpha1.SchemeGroupVersion.Group,
+			Version: v1alpha1.SchemeGroupVersion.Version,
+			Kind:    "Jira",
+		}),
 	}
 }
 
