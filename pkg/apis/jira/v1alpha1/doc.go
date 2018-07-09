@@ -14,4 +14,6 @@
 
 // +k8s:deepcopy-gen=package
 // +groupName=jira.atlassian.com
+
+// Package v1alpha1 defines the types for the JIRA Operator.
 package v1alpha1
