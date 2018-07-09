@@ -15,11 +15,20 @@
 package v1alpha1
 
 import (
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const (
+	// DefaultBaseImage is the default docker image to use for JIRA Pods.
+	DefaultBaseImage = "cptactionhank/atlassian-jira"
+	// DefaultBaseImageVersion is the default version to use for JIRA Pods.
+	DefaultBaseImageVersion = "7.10.2"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// JiraList resource
 type JiraList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
@@ -28,6 +37,7 @@ type JiraList struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// Jira resource
 type Jira struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
@@ -35,9 +45,66 @@ type Jira struct {
 	Status            JiraStatus `json:"status,omitempty"`
 }
 
-type JiraSpec struct {
-	// Fill me
+// JiraPodPolicy defines the policy for pods owned by rethinkdb operator.
+type JiraPodPolicy struct {
+	// Resources is the resource requirements for the jira container.
+	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+
+	// PersistentVolumeClaimSpec is the spec to describe PVC for the jira container
+	// This field is optional. If no PVC spec, jira container will use emptyDir as volume
+	PersistentVolumeClaimSpec *v1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
 }
+
+// JiraSpec resource
+type JiraSpec struct {
+	// Base image to use for a RethinkDB deployment.
+	BaseImage string `json:"base_image"`
+
+	// Version of RethinkDB to be deployed.
+	BaseImageVersion string `json:"base_image_version"`
+
+	// Name of ConfigMap to use or create.
+	ConfigMapName string `json:"configMapName"`
+
+	// Name of Secret to use or create.
+	SecretName string `json:"secretName"`
+
+	// Pod defines the policy for pods owned by rethinkdb operator.
+	// This field cannot be updated once the CR is created.
+	Pod *JiraPodPolicy `json:"pod,omitempty"`
+}
+
+// SetDefaults sets the default vaules for the cuberite spec and returns true if the spec was changed
+func (j *Jira) SetDefaults() bool {
+	changed := false
+	if len(j.Spec.BaseImage) == 0 {
+		j.Spec.BaseImage = DefaultBaseImage
+		changed = true
+	}
+	if len(j.Spec.BaseImageVersion) == 0 {
+		j.Spec.BaseImageVersion = DefaultBaseImageVersion
+		changed = true
+	}
+	if len(j.Spec.ConfigMapName) == 0 {
+		j.Spec.ConfigMapName = j.Name
+		changed = true
+	}
+	if len(j.Spec.SecretName) == 0 {
+		j.Spec.SecretName = j.Name
+		changed = true
+	}
+	return changed
+}
+
+// IsPVEnabled shortcut fucntion to determine PV status.
+func (j *Jira) IsPVEnabled() bool {
+	if podPolicy := j.Spec.Pod; podPolicy != nil {
+		return podPolicy.PersistentVolumeClaimSpec != nil
+	}
+	return false
+}
+
+// JiraStatus resource
 type JiraStatus struct {
 	// Fill me
 }
