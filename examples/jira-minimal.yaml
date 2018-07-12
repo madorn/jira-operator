@@ -1,4 +1,6 @@
-apiVersion: "jira.atlassian.com/v1alpha1"
-kind: "Jira"
+apiVersion: app.redhat.com/v1alpha1
+kind: Jira
 metadata:
-  name: "example-jira"
+  name: jira-minimal
+  labels:
+    example: jira-minimal

@@ -32,7 +32,7 @@ func main() {
 	configureLogging()
 	printVersion()
 
-	resource := "jira.atlassian.com/v1alpha1"
+	resource := "app.redhat.com/v1alpha1"
 	kind := "Jira"
 	namespace, err := k8sutil.GetWatchNamespace()
 	if err != nil {
