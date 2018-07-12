@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"runtime"
 
 	stub "github.com/jmckind/jira-operator/pkg/stub"
@@ -24,28 +25,42 @@ import (
 	k8sutil "github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
-func printVersion() {
-	logrus.Infof("Go Version: %s", runtime.Version())
-	logrus.Infof("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH)
-	logrus.Infof("operator-sdk Version: %v", sdkVersion.Version)
-	logrus.Infof("jira-operator Version: %v", version.Version)
-}
-
 func main() {
+	configureLogging()
 	printVersion()
 
-	resource := "jira.atlassian.com/v1alpha1"
+	resource := "app.redhat.com/v1alpha1"
 	kind := "Jira"
 	namespace, err := k8sutil.GetWatchNamespace()
 	if err != nil {
-		logrus.Fatalf("Failed to get watch namespace: %v", err)
+		log.Fatalf("Failed to get watch namespace: %v", err)
 	}
 	resyncPeriod := 5
-	logrus.Infof("Watching %s, %s, %s, %d", resource, kind, namespace, resyncPeriod)
+	log.Infof("Watching %s, %s, %s, %d", resource, kind, namespace, resyncPeriod)
 	sdk.Watch(resource, kind, namespace, resyncPeriod)
 	sdk.Handle(stub.NewJiraHandler())
 	sdk.Run(context.TODO())
+}
+
+func printVersion() {
+	log.Infof("Go Version: %s", runtime.Version())
+	log.Infof("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH)
+	log.Infof("operator-sdk Version: %v", sdkVersion.Version)
+	log.Infof("jira-operator Version: %v", version.Version)
+}
+
+func configureLogging() {
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	//log.SetOutput(os.Stdout)
+
+	// Allow the log level to be set using an environment variable
+	level, err := log.ParseLevel(os.Getenv("LOG_LEVEL"))
+	if err != nil {
+		level = log.InfoLevel
+	}
+	log.SetLevel(level)
 }

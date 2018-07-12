@@ -25,13 +25,13 @@ kubectl apply -f examples/jira-minimal.yaml
 Build the operator using the SDK.
 
 ```
-operator-sdk build jmckind/jira-operator
+operator-sdk build <REPO>/jira-operator
 ```
 
 Push the new operator image to the remote repository.
 
 ```
-docker push jmckind/jira-operator
+docker push <REPO>/jira-operator
 ```
 
 ## License

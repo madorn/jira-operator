@@ -18,7 +18,6 @@ spec:
           command:
           - jira-operator
           imagePullPolicy: Always
-          tty: true
           env:
             - name: WATCH_NAMESPACE
               valueFrom:

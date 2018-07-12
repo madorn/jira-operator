@@ -4,7 +4,7 @@ metadata:
   name: jira-operator
 rules:
 - apiGroups:
-  - jira.atlassian.com
+  - app.redhat.com
   resources:
   - "*"
   verbs:
