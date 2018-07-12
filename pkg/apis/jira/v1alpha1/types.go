@@ -24,6 +24,8 @@ const (
 	DefaultBaseImage = "cptactionhank/atlassian-jira"
 	// DefaultBaseImageVersion is the default version to use for JIRA Pods.
 	DefaultBaseImageVersion = "7.10.2"
+	// DefaultDataMountPath is the default filesystem path for JIRA Home.
+	DefaultDataMountPath = "/var/atlassian/jira"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -57,16 +59,19 @@ type JiraPodPolicy struct {
 
 // JiraSpec resource
 type JiraSpec struct {
-	// Base image to use for a RethinkDB deployment.
+	// BaseImage image to use for a RethinkDB deployment.
 	BaseImage string `json:"base_image"`
 
-	// Version of RethinkDB to be deployed.
+	// BaseImageVersion is the version of base image to use.
 	BaseImageVersion string `json:"base_image_version"`
 
-	// Name of ConfigMap to use or create.
+	// DataMountPath path for JIRA Home.
+	DataMountPath string `json:"data_mount_path"`
+
+	// ConfigMapName is the name of ConfigMap to use or create.
 	ConfigMapName string `json:"configMapName"`
 
-	// Name of Secret to use or create.
+	// SecretName is the name of Secret to use or create.
 	SecretName string `json:"secretName"`
 
 	// Pod defines the policy for pods owned by rethinkdb operator.
@@ -87,6 +92,10 @@ func (j *Jira) SetDefaults() bool {
 	}
 	if len(j.Spec.ConfigMapName) == 0 {
 		j.Spec.ConfigMapName = j.Name
+		changed = true
+	}
+	if len(j.Spec.DataMountPath) == 0 {
+		j.Spec.DataMountPath = DefaultDataMountPath
 		changed = true
 	}
 	if len(j.Spec.SecretName) == 0 {
