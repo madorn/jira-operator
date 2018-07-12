@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example-postgres
+  labels:
+    app: postgres
+    example: postgres
+data:
+  init-jira-db.sh: |+
+    #!/bin/bash
+    set -e
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+        CREATE USER jira WITH PASSWORD $JIRA_DB_PASSWORD;
+        CREATE DATABASE jiradb WITH ENCODING 'UNICODE' LC_COLLATE 'C' LC_CTYPE 'C' TEMPLATE template0;
+        GRANT ALL PRIVILEGES ON DATABASE jiradb TO jira;
+    EOSQL
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: example-postgres
+  labels:
+    app: postgres
+    example: postgres
+type: Opaque
+data:
+  postgres: ZWxlcGhhbnQK      # elephant
+  jira:     J25vdGppcmEnCg==  # 'notjira'
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: example-postgres
+  labels:
+    app: postgres
+    example: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+      example: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        example: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:10.4
+        env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: example-postgres
+                key: postgres
+          - name: JIRA_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: example-postgres
+                key: jira
+        volumeMounts:
+          - name: db-init-vol
+            mountPath: /docker-entrypoint-initdb.d
+        ports:
+        - containerPort: 5432
+      volumes:
+        - name: db-init-vol
+          configMap:
+            name: example-postgres
+            items:
+              - key: init-jira-db.sh
+                path: init-jira-db.sh
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-postgres
+  labels:
+    app: postgres
+    example: postgres
+spec:
+  selector:
+    app: postgres
+    example: postgres
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
