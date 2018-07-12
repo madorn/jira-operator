@@ -1,0 +1,14 @@
+apiVersion: app.redhat.com/v1alpha1
+kind: Jira
+metadata:
+  name: jira-pvc
+  labels:
+    example: jira-pvc
+spec:
+  pod:
+    persistentVolumeClaimSpec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 5Gi
