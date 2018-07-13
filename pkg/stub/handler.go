@@ -107,7 +107,7 @@ func newJiraConfigMap(j *v1alpha1.Jira) error {
 			Name:            j.Spec.ConfigMapName,
 			Namespace:       j.Namespace,
 			OwnerReferences: ownerRef(j),
-			Labels:          defaultLabels(j),
+			Labels:          jiraLabels(j),
 		},
 		Data: map[string]string{
 			"dbconfig.xml": DefaultDatabaseConfig,
@@ -127,14 +127,15 @@ func newJiraPod(j *v1alpha1.Jira) error {
 			Name:            j.Name,
 			Namespace:       j.Namespace,
 			OwnerReferences: ownerRef(j),
-			Labels:          defaultLabels(j),
+			Labels:          jiraLabels(j),
 		},
 		Spec: jiraPodSpec(j),
 	}
 	return createResource(j, pod)
 }
 
-// newJiraPV will create a JIRA PersistentVolume.
+// newJiraPV will create a JIRA PersistentVolume. There is no owner assigned to
+// prevent loss of data. The user must manually claen up the PVC.
 func newJiraPVC(j *v1alpha1.Jira) error {
 	if !j.IsPVEnabled() {
 		return nil
@@ -146,8 +147,8 @@ func newJiraPVC(j *v1alpha1.Jira) error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      j.Name,
-			Namespace: j.ObjectMeta.Namespace,
-			Labels:    j.ObjectMeta.Labels,
+			Namespace: j.Namespace,
+			Labels:    jiraLabels(j),
 		},
 		Spec: *j.Spec.Pod.PersistentVolumeClaimSpec,
 	}
@@ -165,10 +166,10 @@ func newJiraService(j *v1alpha1.Jira) error {
 			Name:            j.Name,
 			Namespace:       j.Namespace,
 			OwnerReferences: ownerRef(j),
-			Labels:          defaultLabels(j),
+			Labels:          jiraLabels(j),
 		},
 		Spec: v1.ServiceSpec{
-			Selector:        defaultLabels(j),
+			Selector:        jiraLabels(j),
 			SessionAffinity: "ClientIP",
 			Type:            "NodePort",
 			Ports:           servicePorts(j),
@@ -183,6 +184,15 @@ func defaultLabels(j *v1alpha1.Jira) map[string]string {
 		"app":     "jira",
 		"cluster": j.Name,
 	}
+}
+
+// jiraLabels returns the labels for the resource.
+func jiraLabels(j *v1alpha1.Jira) map[string]string {
+	labels := defaultLabels(j)
+	for key, val := range j.ObjectMeta.Labels {
+		labels[key] = val
+	}
+	return labels
 }
 
 // ownerRef returns an owner reference for the operator
