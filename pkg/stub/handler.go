@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // DefaultDatabaseConfig is the default configuration for the JIRA database.
@@ -235,10 +236,12 @@ func jiraContainers(j *v1alpha1.Jira) []v1.Container {
 			ContainerPort: 8080,
 			Name:          "http",
 		}},
-		Resources:    containerResources(j),
-		Stdin:        true,
-		TTY:          true,
-		VolumeMounts: jiraVolumeMounts(j),
+		LivenessProbe:  jiraLivenessProbe(j),
+		ReadinessProbe: jiraReadinessProbe(j),
+		Resources:      containerResources(j),
+		Stdin:          true,
+		TTY:            true,
+		VolumeMounts:   jiraVolumeMounts(j),
 	}}
 }
 
@@ -266,6 +269,44 @@ func containerResources(j *v1alpha1.Jira) v1.ResourceRequirements {
 		resources = j.Spec.Pod.Resources
 	}
 	return resources
+}
+
+// jiraLivenessProbe creates the liveness probe for the JIRA container.
+func jiraLivenessProbe(j *v1alpha1.Jira) *v1.Probe {
+	return &v1.Probe{
+		Handler: v1.Handler{
+			Exec: &v1.ExecAction{
+				Command: []string{
+					"curl",
+					"--connect-timeout", "5",
+					"--max-time", "10",
+					"-k", "-s",
+					fmt.Sprintf("http://localhost:%d/", 8080),
+				},
+			},
+		},
+		InitialDelaySeconds: 10,
+		TimeoutSeconds:      10,
+		PeriodSeconds:       20,
+		FailureThreshold:    3,
+	}
+}
+
+// jiraReadinessProbe creates the liveness probe for the JIRA container.
+func jiraReadinessProbe(j *v1alpha1.Jira) *v1.Probe {
+	return &v1.Probe{
+		Handler: v1.Handler{
+			HTTPGet: &v1.HTTPGetAction{
+				Path:   "/",
+				Port:   intstr.FromInt(8080),
+				Scheme: v1.URISchemeHTTP,
+			},
+		},
+		InitialDelaySeconds: 10,
+		TimeoutSeconds:      10,
+		PeriodSeconds:       10,
+		FailureThreshold:    10,
+	}
 }
 
 func jiraVolumeMounts(j *v1alpha1.Jira) (mounts []v1.VolumeMount) {
