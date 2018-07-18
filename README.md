@@ -34,6 +34,20 @@ Push the new operator image to the remote repository.
 docker push <REPO>/jira-operator
 ```
 
+### Quick Start
+
+Ensure dependencies are safely vendored in the project.
+
+```
+dep ensure -v 
+```
+
+Start the operator out-of-cluster.
+
+```
+LOG_LEVEL="debug" operator up local --namespace <namespace-to-watch> --kubeconfig <path-to-kubeconfig>
+```
+
 ## License
 
 JIRA Operator is under Apache 2.0 license. See the [LICENSE][license_file] file for details.
