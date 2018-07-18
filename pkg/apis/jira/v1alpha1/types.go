@@ -21,7 +21,7 @@ import (
 
 const (
 	// DefaultBaseImage is the default docker image to use for JIRA Pods.
-	DefaultBaseImage = "cptactionhank/atlassian-jira"
+	DefaultBaseImage = "cptactionhank/atlassian-jira-software"
 	// DefaultBaseImageVersion is the default version to use for JIRA Pods.
 	DefaultBaseImageVersion = "7.10.2"
 	// DefaultDataMountPath is the default filesystem path for JIRA Home.
