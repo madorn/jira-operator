@@ -60,13 +60,13 @@ type JiraPodPolicy struct {
 // JiraSpec resource
 type JiraSpec struct {
 	// BaseImage image to use for a RethinkDB deployment.
-	BaseImage string `json:"base_image"`
+	BaseImage string `json:"baseImage"`
 
 	// BaseImageVersion is the version of base image to use.
-	BaseImageVersion string `json:"base_image_version"`
+	BaseImageVersion string `json:"baseImageVersion"`
 
 	// DataMountPath path for JIRA Home.
-	DataMountPath string `json:"data_mount_path"`
+	DataMountPath string `json:"dataMountPath"`
 
 	// ConfigMapName is the name of ConfigMap to use or create.
 	ConfigMapName string `json:"configMapName"`
