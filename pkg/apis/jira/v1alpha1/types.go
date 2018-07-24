@@ -47,7 +47,7 @@ type Jira struct {
 	Status            JiraStatus `json:"status,omitempty"`
 }
 
-// JiraPodPolicy defines the policy for pods owned by rethinkdb operator.
+// JiraPodPolicy defines the policy for pods owned by JIRA operator.
 type JiraPodPolicy struct {
 	// Resources is the resource requirements for the jira container.
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
@@ -59,7 +59,7 @@ type JiraPodPolicy struct {
 
 // JiraSpec resource
 type JiraSpec struct {
-	// BaseImage image to use for a RethinkDB deployment.
+	// BaseImage image to use for a JIRA deployment.
 	BaseImage string `json:"baseImage"`
 
 	// BaseImageVersion is the version of base image to use.
@@ -74,7 +74,7 @@ type JiraSpec struct {
 	// SecretName is the name of Secret to use or create.
 	SecretName string `json:"secretName"`
 
-	// Pod defines the policy for pods owned by rethinkdb operator.
+	// Pod defines the policy for pods owned by JIRA operator.
 	// This field cannot be updated once the CR is created.
 	Pod *JiraPodPolicy `json:"pod,omitempty"`
 }
