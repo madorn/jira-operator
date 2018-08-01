@@ -57,6 +57,14 @@ type JiraPodPolicy struct {
 	PersistentVolumeClaimSpec *v1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
 }
 
+// JiraIngressPolicy defines the Ingress policy for the operator.
+type JiraIngressPolicy struct {
+	Host       string `json:"hostname"`
+	TLS        bool   `json:"tls"`
+	Path       string `json:"path"`
+	SecretName string `json:"secretName,omitempty"`
+}
+
 // JiraSpec resource
 type JiraSpec struct {
 	// BaseImage image to use for a JIRA deployment.
@@ -77,9 +85,12 @@ type JiraSpec struct {
 	// Pod defines the policy for pods owned by JIRA operator.
 	// This field cannot be updated once the CR is created.
 	Pod *JiraPodPolicy `json:"pod,omitempty"`
+
+	// Ingress defines the Ingress policy for the JIRA operator.
+	Ingress *JiraIngressPolicy `json:"ingress,omitempty"`
 }
 
-// SetDefaults sets the default vaules for the cuberite spec and returns true if the spec was changed
+// SetDefaults sets the default vaules for the Jira spec and returns true if the spec was changed
 func (j *Jira) SetDefaults() bool {
 	changed := false
 	if len(j.Spec.BaseImage) == 0 {
@@ -100,6 +111,28 @@ func (j *Jira) SetDefaults() bool {
 	}
 	if len(j.Spec.SecretName) == 0 {
 		j.Spec.SecretName = j.Name
+		changed = true
+	}
+	if j.SetIngressDefaults() {
+		changed = true
+	}
+	return changed
+}
+
+// SetIngressDefaults sets the default vaules for the Jira Ingress policy and returns true if the spec was changed.
+func (j *Jira) SetIngressDefaults() bool {
+	changed := false
+	if j.Spec.Ingress == nil {
+		return changed
+	}
+	if len(j.Spec.Ingress.Host) == 0 {
+		j.Spec.Ingress.Host = j.Name
+	}
+	if len(j.Spec.Ingress.Path) == 0 {
+		j.Spec.Ingress.Path = "/"
+	}
+	if len(j.Spec.Ingress.SecretName) == 0 {
+		j.Spec.Ingress.SecretName = j.Name
 		changed = true
 	}
 	return changed
