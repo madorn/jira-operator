@@ -285,9 +285,9 @@ func jiraLivenessProbe(j *v1alpha1.Jira) *v1.Probe {
 				},
 			},
 		},
-		InitialDelaySeconds: 10,
+		InitialDelaySeconds: 120,
 		TimeoutSeconds:      10,
-		PeriodSeconds:       20,
+		PeriodSeconds:       120,
 		FailureThreshold:    3,
 	}
 }
@@ -302,10 +302,10 @@ func jiraReadinessProbe(j *v1alpha1.Jira) *v1.Probe {
 				Scheme: v1.URISchemeHTTP,
 			},
 		},
-		InitialDelaySeconds: 10,
+		InitialDelaySeconds: 60,
 		TimeoutSeconds:      10,
-		PeriodSeconds:       10,
-		FailureThreshold:    10,
+		PeriodSeconds:       30,
+		FailureThreshold:    5,
 	}
 }
 
