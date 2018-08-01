@@ -13,3 +13,42 @@
 // limitations under the License.
 
 package jira
+
+import (
+	"errors"
+	"testing"
+
+	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// TestNewPodMetadata verifies that a Pod gets created with correct metadata.
+func TestNewPodMetadata(t *testing.T) {
+	j := &v1alpha1.Jira{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "test-namespace",
+		},
+	}
+
+	pod := newPod(j)
+
+	assert.NotNil(t, pod)
+	assert.Equal(t, "test", pod.ObjectMeta.Name)
+	assert.Equal(t, "test-namespace", pod.ObjectMeta.Namespace)
+}
+
+// TestProcessPodsError verifies an unexpected error is returned when encountered.
+func TestProcessPodsError(t *testing.T) {
+	s := new(MockSDK)
+	s.On("Get", mock.Anything).Return(errors.New("test-error"))
+
+	err := processPods(new(v1alpha1.Jira), s)
+
+	if assert.Error(t, err) {
+		assert.Equal(t, errors.New("test-error"), err)
+	}
+	s.AssertExpectations(t)
+}
