@@ -1,0 +1,10 @@
+apiVersion: app.redhat.com/v1alpha1
+kind: Jira
+metadata:
+  name: jira-ingress
+  labels:
+    example: jira-ingress
+spec:
+  ingress:
+    host: jira-ingress.example.com
+    tls: true
