@@ -58,13 +58,13 @@ func (r *Reconciler) Reconcile(jr *v1alpha1.Jira) (err error) {
 		return
 	}
 
-	// if err = newJiraPod(r); err != nil {
-	// 	return
-	// }
-	//
-	// if err = newJiraService(r); err != nil {
-	// 	return
-	// }
+	if err = processPods(r.resource, r.sdk); err != nil {
+		return
+	}
+
+	if err = processService(r.resource, r.sdk); err != nil {
+		return
+	}
 
 	return nil
 }
