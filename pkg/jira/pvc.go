@@ -33,9 +33,7 @@ func newPVC(j *v1alpha1.Jira) *v1.PersistentVolumeClaim {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      j.Name,
 			Namespace: j.Namespace,
-			Labels:    resourceLabels(j),
 		},
-		Spec: *j.Spec.Pod.PersistentVolumeClaimSpec,
 	}
 }
 
@@ -50,6 +48,7 @@ func processPVC(j *v1alpha1.Jira, s OperatorSDK) error {
 	if apierrors.IsNotFound(err) {
 		log.Debugf("creating new pvc: %v", pvc.ObjectMeta.Name)
 		pvc.ObjectMeta.Labels = resourceLabels(j)
+		pvc.Spec = *j.Spec.Pod.PersistentVolumeClaimSpec
 		return s.Create(pvc)
 	}
 	return err
