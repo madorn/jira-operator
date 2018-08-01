@@ -1,0 +1,5 @@
+{
+    "env": {
+        "KUBERNETES_CONFIG": "$HOME/.kube/config"
+    }
+}
