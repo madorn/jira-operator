@@ -15,6 +15,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -132,10 +134,23 @@ func (j *Jira) SetIngressDefaults() bool {
 		j.Spec.Ingress.Path = "/"
 	}
 	if len(j.Spec.Ingress.SecretName) == 0 {
-		j.Spec.Ingress.SecretName = j.Name
+		j.Spec.Ingress.SecretName = fmt.Sprintf("%s-ingress", j.Name)
 		changed = true
 	}
 	return changed
+}
+
+// IsIngressEnabled shortcut fucntion to determine Ingress status.
+func (j *Jira) IsIngressEnabled() bool {
+	return j.Spec.Ingress != nil
+}
+
+// IsIngressTLSEnabled shortcut fucntion to determine Ingress TLS status.
+func (j *Jira) IsIngressTLSEnabled() bool {
+	if j.IsIngressEnabled() {
+		return j.Spec.Ingress.TLS
+	}
+	return false
 }
 
 // IsPVEnabled shortcut fucntion to determine PV status.
