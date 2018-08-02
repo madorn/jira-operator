@@ -17,15 +17,31 @@ package jira
 import (
 	"testing"
 
+	"github.com/jmckind/jira-operator/pkg/tls"
 	"github.com/stretchr/testify/assert"
 )
 
-// TestNewCACertificate verifies that a new certificate and private key are generated.
+// TestNewCACertificate verifies that a new CA certificate and private key are generated.
 func TestNewCACertificate(t *testing.T) {
 
-	key, cert, err := newCACertificate()
+	key, crt, err := newCACertificate()
 
 	assert.NotNil(t, key)
-	assert.NotNil(t, cert)
+	assert.NotNil(t, crt)
+	assert.Nil(t, err)
+}
+
+// TestNewTLSCertificate verifies that a new certificate and private key are generated.
+func TestNewTLSCertificate(t *testing.T) {
+	caKey, caCrt, err := newCACertificate()
+	config := tls.CertConfig{
+		CommonName:   "test-ingress-host",
+		Organization: orgForTLSCert,
+		AltNames:     tls.NewAltNames([]string{"test-alt-name"}),
+	}
+	key, crt, err := newTLSCertificate(caCrt, caKey, config)
+
+	assert.NotNil(t, key)
+	assert.NotNil(t, crt)
 	assert.Nil(t, err)
 }

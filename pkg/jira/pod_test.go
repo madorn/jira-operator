@@ -21,7 +21,9 @@ import (
 	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // TestNewPodMetadata verifies that a Pod gets created with correct metadata.
@@ -50,5 +52,28 @@ func TestProcessPodsError(t *testing.T) {
 	if assert.Error(t, err) {
 		assert.Equal(t, errors.New("test-error"), err)
 	}
+	s.AssertExpectations(t)
+}
+
+// TestProcessPodsExists verifies a new Pod resource is not created when it already exists.
+func TestProcessPodsExists(t *testing.T) {
+	s := new(MockSDK)
+	s.On("Get", mock.Anything).Return(nil)
+
+	err := processPods(new(v1alpha1.Jira), s)
+
+	assert.Nil(t, err)
+	s.AssertExpectations(t)
+}
+
+// TestProcessPodsNew verifies a new Pod resource is created when it does not exist.
+func TestProcessPodsNew(t *testing.T) {
+	s := new(MockSDK)
+	s.On("Get", mock.Anything).Return(apierrors.NewNotFound(schema.GroupResource{}, "test"))
+	s.On("Create", mock.Anything).Return(nil)
+
+	err := processPods(new(v1alpha1.Jira), s)
+
+	assert.Nil(t, err)
 	s.AssertExpectations(t)
 }

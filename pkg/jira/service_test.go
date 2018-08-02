@@ -21,7 +21,9 @@ import (
 	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // TestNewServiceMetadata verifies that a Service gets created with correct metadata.
@@ -50,5 +52,28 @@ func TestProcessServiceError(t *testing.T) {
 	if assert.Error(t, err) {
 		assert.Equal(t, errors.New("test-error"), err)
 	}
+	s.AssertExpectations(t)
+}
+
+// TestProcessServiceExists verifies a new Service resource is not created when it already exists.
+func TestProcessServiceExists(t *testing.T) {
+	s := new(MockSDK)
+	s.On("Get", mock.Anything).Return(nil)
+
+	err := processService(new(v1alpha1.Jira), s)
+
+	assert.Nil(t, err)
+	s.AssertExpectations(t)
+}
+
+// TestProcessServiceNew verifies a new Service resource is created when it does not exist.
+func TestProcessServiceNew(t *testing.T) {
+	s := new(MockSDK)
+	s.On("Get", mock.Anything).Return(apierrors.NewNotFound(schema.GroupResource{}, "test"))
+	s.On("Create", mock.Anything).Return(nil)
+
+	err := processService(new(v1alpha1.Jira), s)
+
+	assert.Nil(t, err)
 	s.AssertExpectations(t)
 }
