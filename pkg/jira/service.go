@@ -22,6 +22,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	// DefaultServicePort is the default Jira port.
+	DefaultServicePort = 8080
+
+	// DefaultServiceName is the default standard port name/scheme.
+	DefaultServiceName = "http"
+)
+
 // newService returns a new Service resource.
 func newService(j *v1alpha1.Jira) *v1.Service {
 	return &v1.Service{
@@ -36,11 +44,11 @@ func newService(j *v1alpha1.Jira) *v1.Service {
 	}
 }
 
-// newServicePorts returns a new list of ServicePort resources.
-func newServicePorts(j *v1alpha1.Jira) []v1.ServicePort {
+// servicePorts returns a new list of ServicePort resources.
+func servicePorts(j *v1alpha1.Jira) []v1.ServicePort {
 	return []v1.ServicePort{{
-		Port: 8080,
-		Name: "http",
+		Port: DefaultServicePort,
+		Name: DefaultServiceName,
 	}}
 }
 
@@ -56,7 +64,7 @@ func processService(j *v1alpha1.Jira, s OperatorSDK) error {
 			Selector:        resourceLabels(j),
 			SessionAffinity: "ClientIP",
 			Type:            "NodePort",
-			Ports:           newServicePorts(j),
+			Ports:           servicePorts(j),
 		}
 		return s.Create(svc)
 	}
