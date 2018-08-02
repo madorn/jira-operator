@@ -42,7 +42,6 @@ func (r *Reconciler) Reconcile(jr *v1alpha1.Jira) (err error) {
 		return errors.New("jira reference cannot be nil")
 	}
 
-	// Simulate initializer
 	r.resource = jr.DeepCopy()
 	changed := r.resource.SetDefaults()
 	if changed {
@@ -63,6 +62,14 @@ func (r *Reconciler) Reconcile(jr *v1alpha1.Jira) (err error) {
 	}
 
 	if err = processService(r.resource, r.sdk); err != nil {
+		return
+	}
+
+	if err = processIngressSecret(r.resource, r.sdk); err != nil {
+		return
+	}
+
+	if err = processIngress(r.resource, r.sdk); err != nil {
 		return
 	}
 
