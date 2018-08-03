@@ -153,10 +153,15 @@ func (j *Jira) IsIngressTLSEnabled() bool {
 	return false
 }
 
+// IsPodPolicySet shortcut fucntion to determine Pod policy status.
+func (j *Jira) IsPodPolicySet() bool {
+	return j.Spec.Pod != nil
+}
+
 // IsPVEnabled shortcut fucntion to determine PV status.
 func (j *Jira) IsPVEnabled() bool {
-	if podPolicy := j.Spec.Pod; podPolicy != nil {
-		return podPolicy.PersistentVolumeClaimSpec != nil
+	if j.IsPodPolicySet() {
+		return j.Spec.Pod.PersistentVolumeClaimSpec != nil
 	}
 	return false
 }
