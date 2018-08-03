@@ -29,6 +29,16 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+func ingressAnnotations(j *v1alpha1.Jira) map[string]string {
+	result := make(map[string]string)
+	if j.Spec.Ingress.Annotations != nil {
+		for key, val := range j.Spec.Ingress.Annotations {
+			result[key] = val
+		}
+	}
+	return result
+}
+
 // ingressRules returns the rules for the Ingress resource.
 func ingressRules(j *v1alpha1.Jira) []extensions.IngressRule {
 	return []extensions.IngressRule{{
@@ -117,6 +127,7 @@ func processIngress(j *v1alpha1.Jira, s OperatorSDK) error {
 	err := s.Get(ing)
 	if apierrors.IsNotFound(err) {
 		log.Debugf("creating new ingress: %v", ing.ObjectMeta.Name)
+		ing.ObjectMeta.Annotations = ingressAnnotations(j)
 		ing.ObjectMeta.OwnerReferences = ownerRef(j)
 		ing.ObjectMeta.Labels = resourceLabels(j)
 		ing.Spec.Rules = ingressRules(j)

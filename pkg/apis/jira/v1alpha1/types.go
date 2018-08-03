@@ -61,10 +61,11 @@ type JiraPodPolicy struct {
 
 // JiraIngressPolicy defines the Ingress policy for the operator.
 type JiraIngressPolicy struct {
-	Host       string `json:"host"`
-	TLS        bool   `json:"tls"`
-	Path       string `json:"path"`
-	SecretName string `json:"secretName,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+	Host        string            `json:"host"`
+	TLS         bool              `json:"tls"`
+	Path        string            `json:"path"`
+	SecretName  string            `json:"secretName,omitempty"`
 }
 
 // JiraSpec resource
