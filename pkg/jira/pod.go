@@ -40,6 +40,30 @@ const (
 
 	// DefaultEnvXProxyScheme for the jira contianer.
 	DefaultEnvXProxyScheme = "https"
+
+	// DefaultLivenessInitialDelaySeconds for the jira contianer.
+	DefaultLivenessInitialDelaySeconds = 120
+
+	// DefaultLivenessTimeoutSeconds for the jira contianer.
+	DefaultLivenessTimeoutSeconds = 10
+
+	// DefaultLivenessPeriodSeconds for the jira contianer.
+	DefaultLivenessPeriodSeconds = 120
+
+	// DefaultLivenessFailureThreshold for the jira contianer.
+	DefaultLivenessFailureThreshold = 3
+
+	// DefaultReadinessInitialDelaySeconds for the jira contianer.
+	DefaultReadinessInitialDelaySeconds = 60
+
+	// DefaultReadinessTimeoutSeconds for the jira contianer.
+	DefaultReadinessTimeoutSeconds = 10
+
+	// DefaultReadinessPeriodSeconds for the jira contianer.
+	DefaultReadinessPeriodSeconds = 30
+
+	// DefaultReadinessFailureThreshold for the jira contianer.
+	DefaultReadinessFailureThreshold = 5
 )
 
 // containerEnv returns the environment for the Jira Pod resource.
@@ -64,14 +88,14 @@ func containerLivenessProbe(j *v1alpha1.Jira) *v1.Probe {
 					"--connect-timeout", "5",
 					"--max-time", "10",
 					"-k", "-s",
-					fmt.Sprintf("http://localhost:%d/", 8080),
+					fmt.Sprintf("http://localhost:%d/", DefaultContainerPort),
 				},
 			},
 		},
-		InitialDelaySeconds: 120,
-		TimeoutSeconds:      10,
-		PeriodSeconds:       120,
-		FailureThreshold:    3,
+		InitialDelaySeconds: DefaultLivenessInitialDelaySeconds,
+		TimeoutSeconds:      DefaultLivenessTimeoutSeconds,
+		PeriodSeconds:       DefaultLivenessPeriodSeconds,
+		FailureThreshold:    DefaultLivenessFailureThreshold,
 	}
 }
 
@@ -81,21 +105,21 @@ func containerReadinessProbe(j *v1alpha1.Jira) *v1.Probe {
 		Handler: v1.Handler{
 			HTTPGet: &v1.HTTPGetAction{
 				Path:   "/",
-				Port:   intstr.FromInt(8080),
+				Port:   intstr.FromInt(DefaultContainerPort),
 				Scheme: v1.URISchemeHTTP,
 			},
 		},
-		InitialDelaySeconds: 60,
-		TimeoutSeconds:      10,
-		PeriodSeconds:       30,
-		FailureThreshold:    5,
+		InitialDelaySeconds: DefaultReadinessInitialDelaySeconds,
+		TimeoutSeconds:      DefaultReadinessTimeoutSeconds,
+		PeriodSeconds:       DefaultReadinessPeriodSeconds,
+		FailureThreshold:    DefaultReadinessFailureThreshold,
 	}
 }
 
 // containerResources returns a new ResourceRequirements resource.
 func containerResources(j *v1alpha1.Jira) v1.ResourceRequirements {
 	resources := v1.ResourceRequirements{}
-	if j.Spec.Pod != nil {
+	if j.IsPodPolicySet() {
 		resources = j.Spec.Pod.Resources
 	}
 	return resources
