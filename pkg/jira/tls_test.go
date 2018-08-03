@@ -33,7 +33,7 @@ func TestNewCACertificate(t *testing.T) {
 
 // TestNewTLSCertificate verifies that a new certificate and private key are generated.
 func TestNewTLSCertificate(t *testing.T) {
-	caKey, caCrt, err := newCACertificate()
+	caKey, caCrt, _ := newCACertificate()
 	config := tls.CertConfig{
 		CommonName:   "test-ingress-host",
 		Organization: orgForTLSCert,
