@@ -34,7 +34,25 @@ const (
 
 	// DefaultContainerPortName for the jira contianer.
 	DefaultContainerPortName = "http"
+
+	// DefaultEnvXProxyPort for the jira contianer.
+	DefaultEnvXProxyPort = "443"
+
+	// DefaultEnvXProxyScheme for the jira contianer.
+	DefaultEnvXProxyScheme = "https"
 )
+
+// containerEnv returns the environment for the Jira Pod resource.
+func containerEnv(j *v1alpha1.Jira) []v1.EnvVar {
+	result := make([]v1.EnvVar, 0)
+	if j.IsIngressTLSEnabled() {
+		result = append(result, v1.EnvVar{Name: "X_PATH", Value: j.Spec.Ingress.Path})
+		result = append(result, v1.EnvVar{Name: "X_PROXY_NAME", Value: j.Spec.Ingress.Host})
+		result = append(result, v1.EnvVar{Name: "X_PROXY_PORT", Value: DefaultEnvXProxyPort})
+		result = append(result, v1.EnvVar{Name: "X_PROXY_SCHEME", Value: DefaultEnvXProxyScheme})
+	}
+	return result
+}
 
 // containerLivenessProbe returns a new liveness Probe resource.
 func containerLivenessProbe(j *v1alpha1.Jira) *v1.Probe {
@@ -135,6 +153,7 @@ func newPodSpec(j *v1alpha1.Jira) v1.PodSpec {
 // podContainers returns a new list of Container resources.
 func podContainers(j *v1alpha1.Jira) []v1.Container {
 	return []v1.Container{{
+		Env:           containerEnv(j),
 		Image:         fmt.Sprintf("%s:%s", j.Spec.BaseImage, j.Spec.BaseImageVersion),
 		LivenessProbe: containerLivenessProbe(j),
 		Name:          DefaultContainerName,
