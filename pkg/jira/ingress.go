@@ -39,7 +39,7 @@ func ingressRules(j *v1alpha1.Jira) []extensions.IngressRule {
 					Path: j.Spec.Ingress.Path,
 					Backend: extensions.IngressBackend{
 						ServiceName: j.Name,
-						ServicePort: intstr.FromInt(8080),
+						ServicePort: intstr.FromInt(DefaultServicePort),
 					},
 				},
 				},
@@ -50,7 +50,7 @@ func ingressRules(j *v1alpha1.Jira) []extensions.IngressRule {
 }
 
 // ingressSecretCerts returns TLS certificates for the Ingress resource.
-func ingressSecretCerts(j *v1alpha1.Jira) (caCert *x509.Certificate, key *rsa.PrivateKey, crt *x509.Certificate, err error) {
+func ingressSecretCerts(j *v1alpha1.Jira) (*x509.Certificate, *rsa.PrivateKey, *x509.Certificate, error) {
 	caKey, caCrt, err := newCACertificate()
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to create ca certificate: %v", err)
@@ -61,11 +61,11 @@ func ingressSecretCerts(j *v1alpha1.Jira) (caCert *x509.Certificate, key *rsa.Pr
 		Organization: orgForTLSCert,
 		AltNames:     tls.NewAltNames([]string{j.Spec.Ingress.Host}),
 	}
-	key, crt, err = newTLSCertificate(caCrt, caKey, config)
+	key, crt, err := newTLSCertificate(caCrt, caKey, config)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to create tls certificate: %v", err)
 	}
-	return
+	return caCrt, key, crt, nil
 }
 
 // ingressTLS returns the TLS policy for the Ingress resource.
@@ -85,7 +85,7 @@ func newIngress(j *v1alpha1.Jira) *extensions.Ingress {
 			APIVersion: "extensions/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      j.Name,
+			Name:      j.ObjectMeta.Name,
 			Namespace: j.Namespace,
 		},
 	}
@@ -102,6 +102,7 @@ func newIngressSecret(j *v1alpha1.Jira) *v1.Secret {
 			Name:      j.Spec.Ingress.SecretName,
 			Namespace: j.Namespace,
 		},
+		Type: v1.SecretTypeTLS,
 	}
 }
 
@@ -140,7 +141,7 @@ func processIngressSecret(j *v1alpha1.Jira, s OperatorSDK) error {
 	if apierrors.IsNotFound(err) {
 		log.Debugf("creating new ingress secret: %v", sec.ObjectMeta.Name)
 
-		caCrt, key, crt, errx := ingressSecretCerts(j)
+		_, key, crt, errx := ingressSecretCerts(j)
 		if errx != nil {
 			return fmt.Errorf("failed to create tls certificate: %v", err)
 		}
@@ -150,7 +151,6 @@ func processIngressSecret(j *v1alpha1.Jira, s OperatorSDK) error {
 		sec.Data = map[string][]byte{
 			"tls.key": tls.EncodePrivateKeyPEM(key),
 			"tls.crt": tls.EncodeCertificatePEM(crt),
-			"ca.crt":  tls.EncodeCertificatePEM(caCrt),
 		}
 		return s.Create(sec)
 	}
