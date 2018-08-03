@@ -26,9 +26,9 @@ func TestNewCACertificate(t *testing.T) {
 
 	key, crt, err := newCACertificate()
 
-	assert.NotNil(t, key)
-	assert.NotNil(t, crt)
 	assert.Nil(t, err)
+	assert.NotEmpty(t, key)
+	assert.NotEmpty(t, crt)
 }
 
 // TestNewTLSCertificate verifies that a new certificate and private key are generated.
@@ -39,9 +39,11 @@ func TestNewTLSCertificate(t *testing.T) {
 		Organization: orgForTLSCert,
 		AltNames:     tls.NewAltNames([]string{"test-alt-name"}),
 	}
+
 	key, crt, err := newTLSCertificate(caCrt, caKey, config)
 
-	assert.NotNil(t, key)
-	assert.NotNil(t, crt)
 	assert.Nil(t, err)
+	assert.NotEmpty(t, caCrt)
+	assert.NotEmpty(t, key)
+	assert.NotEmpty(t, crt)
 }

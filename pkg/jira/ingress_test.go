@@ -24,16 +24,38 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func TestIngressSecretCerts(t *testing.T) {
+	j := &v1alpha1.Jira{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-jira",
+			Namespace: "test-jira-namespace",
+		},
+		Spec: v1alpha1.JiraSpec{
+			Ingress: &v1alpha1.JiraIngressPolicy{
+				Host: "test-ingress-host",
+				TLS:  true,
+			},
+		},
+	}
+
+	caCrt, key, crt, err := ingressSecretCerts(j)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, caCrt)
+	assert.NotEmpty(t, key)
+	assert.NotEmpty(t, crt)
+}
+
 // TestNewIngressMetadata verifies that an Ingress gets created with correct metadata.
 func TestNewIngressMetadata(t *testing.T) {
 	j := &v1alpha1.Jira{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test",
-			Namespace: "test-namespace",
+			Name:      "test-jira",
+			Namespace: "test-jira-namespace",
 		},
 		Spec: v1alpha1.JiraSpec{
 			Ingress: &v1alpha1.JiraIngressPolicy{
-				Host: "test-host",
+				Host: "test-ingress-host",
 			},
 		},
 	}
@@ -41,8 +63,8 @@ func TestNewIngressMetadata(t *testing.T) {
 	ing := newIngress(j)
 
 	assert.NotNil(t, ing)
-	assert.Equal(t, "test", ing.ObjectMeta.Name)
-	assert.Equal(t, "test-namespace", ing.ObjectMeta.Namespace)
+	assert.Equal(t, "test-jira", ing.ObjectMeta.Name)
+	assert.Equal(t, "test-jira-namespace", ing.ObjectMeta.Namespace)
 }
 
 // TestNewIngressSecretMetadata verifies that an Ingress Secret gets created with correct metadata.
