@@ -25,6 +25,17 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+const (
+	// DefaultContainerName for the jira contianer.
+	DefaultContainerName = "jira"
+
+	// DefaultContainerPort for the jira contianer.
+	DefaultContainerPort = 8080
+
+	// DefaultContainerPortName for the jira contianer.
+	DefaultContainerPortName = "http"
+)
+
 // containerLivenessProbe returns a new liveness Probe resource.
 func containerLivenessProbe(j *v1alpha1.Jira) *v1.Probe {
 	return &v1.Probe{
@@ -124,13 +135,13 @@ func newPodSpec(j *v1alpha1.Jira) v1.PodSpec {
 // podContainers returns a new list of Container resources.
 func podContainers(j *v1alpha1.Jira) []v1.Container {
 	return []v1.Container{{
-		Name:  "jira",
-		Image: fmt.Sprintf("%s:%s", j.Spec.BaseImage, j.Spec.BaseImageVersion),
+		Image:         fmt.Sprintf("%s:%s", j.Spec.BaseImage, j.Spec.BaseImageVersion),
+		LivenessProbe: containerLivenessProbe(j),
+		Name:          DefaultContainerName,
 		Ports: []v1.ContainerPort{{
-			ContainerPort: 8080,
-			Name:          "http",
+			ContainerPort: DefaultContainerPort,
+			Name:          DefaultContainerPortName,
 		}},
-		LivenessProbe:  containerLivenessProbe(j),
 		ReadinessProbe: containerReadinessProbe(j),
 		Resources:      containerResources(j),
 		Stdin:          true,
