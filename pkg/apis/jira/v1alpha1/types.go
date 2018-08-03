@@ -61,7 +61,7 @@ type JiraPodPolicy struct {
 
 // JiraIngressPolicy defines the Ingress policy for the operator.
 type JiraIngressPolicy struct {
-	Host       string `json:"hostname"`
+	Host       string `json:"host"`
 	TLS        bool   `json:"tls"`
 	Path       string `json:"path"`
 	SecretName string `json:"secretName,omitempty"`
@@ -104,7 +104,7 @@ func (j *Jira) SetDefaults() bool {
 		changed = true
 	}
 	if len(j.Spec.ConfigMapName) == 0 {
-		j.Spec.ConfigMapName = j.Name
+		j.Spec.ConfigMapName = j.ObjectMeta.Name
 		changed = true
 	}
 	if len(j.Spec.DataMountPath) == 0 {
@@ -112,7 +112,7 @@ func (j *Jira) SetDefaults() bool {
 		changed = true
 	}
 	if len(j.Spec.SecretName) == 0 {
-		j.Spec.SecretName = j.Name
+		j.Spec.SecretName = j.ObjectMeta.Name
 		changed = true
 	}
 	if j.SetIngressDefaults() {
@@ -128,13 +128,13 @@ func (j *Jira) SetIngressDefaults() bool {
 		return changed
 	}
 	if len(j.Spec.Ingress.Host) == 0 {
-		j.Spec.Ingress.Host = j.Name
+		j.Spec.Ingress.Host = j.ObjectMeta.Name
 	}
 	if len(j.Spec.Ingress.Path) == 0 {
 		j.Spec.Ingress.Path = "/"
 	}
 	if len(j.Spec.Ingress.SecretName) == 0 {
-		j.Spec.Ingress.SecretName = fmt.Sprintf("%s-ingress", j.Name)
+		j.Spec.Ingress.SecretName = fmt.Sprintf("%s-ingress", j.ObjectMeta.Name)
 		changed = true
 	}
 	return changed
