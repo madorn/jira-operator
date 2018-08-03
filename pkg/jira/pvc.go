@@ -15,9 +15,8 @@
 package jira
 
 import (
-	"github.com/cloudflare/cfssl/log"
 	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,7 +39,7 @@ func newPVC(j *v1alpha1.Jira) *v1.PersistentVolumeClaim {
 // processPVC manages the state of the Jira PersistentVolumeClaim resource.
 func processPVC(j *v1alpha1.Jira, s OperatorSDK) error {
 	if !j.IsPVEnabled() {
-		logrus.Debug("pvc disabled for resource: %s", j.ObjectMeta.Name)
+		log.Debugf("pvc disabled for resource: %s", j.ObjectMeta.Name)
 		return nil
 	}
 	pvc := newPVC(j)

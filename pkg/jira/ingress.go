@@ -19,10 +19,9 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"github.com/cloudflare/cfssl/log"
 	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
 	"github.com/jmckind/jira-operator/pkg/tls"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	extensions "k8s.io/api/extensions/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -109,7 +108,7 @@ func newIngressSecret(j *v1alpha1.Jira) *v1.Secret {
 // processIngress manages the state of the Jira Ingress resource.
 func processIngress(j *v1alpha1.Jira, s OperatorSDK) error {
 	if !j.IsIngressEnabled() {
-		logrus.Debug("ingress disabled for resource: %s", j.ObjectMeta.Name)
+		log.Debugf("ingress disabled for resource: %s", j.ObjectMeta.Name)
 		return nil
 	}
 
@@ -132,7 +131,7 @@ func processIngress(j *v1alpha1.Jira, s OperatorSDK) error {
 // processIngressSecret manages the state of the Jira Ingress Secret resource.
 func processIngressSecret(j *v1alpha1.Jira, s OperatorSDK) error {
 	if !j.IsIngressTLSEnabled() {
-		logrus.Debug("ingress tls disabled for resource: %s", j.ObjectMeta.Name)
+		log.Debugf("ingress tls disabled for resource: %s", j.ObjectMeta.Name)
 		return nil
 	}
 

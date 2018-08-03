@@ -63,6 +63,8 @@ func newConfigMap(j *v1alpha1.Jira) *v1.ConfigMap {
 // ProcessConfigMap manages the state of the Jira ConfigMap resource.
 func processConfigMap(j *v1alpha1.Jira, s OperatorSDK) error {
 	cm := newConfigMap(j)
+	log.Debugf("process configmap: %s", cm.ObjectMeta.Name)
+
 	err := s.Get(cm)
 	if apierrors.IsNotFound(err) {
 		log.Debugf("creating new configmap: %s", cm.ObjectMeta.Name)

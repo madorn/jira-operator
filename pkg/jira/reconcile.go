@@ -17,8 +17,8 @@ package jira
 import (
 	"errors"
 
-	"github.com/cloudflare/cfssl/log"
 	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
+	log "github.com/sirupsen/logrus"
 )
 
 // Reconciler ensures that the actual state of the Jira resource matches the desired state.
@@ -42,7 +42,9 @@ func (r *Reconciler) Reconcile(jr *v1alpha1.Jira) (err error) {
 		return errors.New("jira reference cannot be nil")
 	}
 
+	log.Debugf("reconciling resource: %s", jr.ObjectMeta.Name)
 	r.resource = jr.DeepCopy()
+
 	changed := r.resource.SetDefaults()
 	if changed {
 		log.Debug("simulating initializer")
@@ -73,5 +75,6 @@ func (r *Reconciler) Reconcile(jr *v1alpha1.Jira) (err error) {
 		return
 	}
 
+	log.Debugf("finished reconciling resource: %s", jr.ObjectMeta.Name)
 	return nil
 }
