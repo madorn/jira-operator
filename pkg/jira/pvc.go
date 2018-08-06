@@ -1,0 +1,54 @@
+// Copyright 2018 Jira Operator Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package jira
+
+import (
+	"github.com/coreos/jira-operator/pkg/apis/jira/v1alpha1"
+	log "github.com/sirupsen/logrus"
+	"k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// newConfigMap returns a new ConfigMap resource.
+func newPVC(j *v1alpha1.Jira) *v1.PersistentVolumeClaim {
+	return &v1.PersistentVolumeClaim{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PersistentVolumeClaim",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      j.Name,
+			Namespace: j.Namespace,
+		},
+	}
+}
+
+// processPVC manages the state of the Jira PersistentVolumeClaim resource.
+func processPVC(j *v1alpha1.Jira, s OperatorSDK) error {
+	if !j.IsPVEnabled() {
+		log.Debugf("pvc disabled for resource: %s", j.ObjectMeta.Name)
+		return nil
+	}
+	pvc := newPVC(j)
+	err := s.Get(pvc)
+	if apierrors.IsNotFound(err) {
+		log.Debugf("creating new pvc: %v", pvc.ObjectMeta.Name)
+		pvc.ObjectMeta.Labels = resourceLabels(j)
+		pvc.Spec = *j.Spec.Pod.PersistentVolumeClaimSpec
+		return s.Create(pvc)
+	}
+	return err
+}

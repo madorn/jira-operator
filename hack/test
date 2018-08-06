@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export KUBERNETES_CONFIG=${KUBERNETES_CONFIG:=$HOME/.kube/config}
+
+go test ./... -timeout 120s -v -short -cover -covermode atomic -coverprofile=tmp/_output/coverage.out

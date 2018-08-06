@@ -15,6 +15,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -47,7 +49,7 @@ type Jira struct {
 	Status            JiraStatus `json:"status,omitempty"`
 }
 
-// JiraPodPolicy defines the policy for pods owned by rethinkdb operator.
+// JiraPodPolicy defines the policy for pods owned by JIRA operator.
 type JiraPodPolicy struct {
 	// Resources is the resource requirements for the jira container.
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
@@ -57,16 +59,25 @@ type JiraPodPolicy struct {
 	PersistentVolumeClaimSpec *v1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
 }
 
+// JiraIngressPolicy defines the Ingress policy for the operator.
+type JiraIngressPolicy struct {
+	Annotations map[string]string `json:"annotations,omitempty"`
+	Host        string            `json:"host"`
+	TLS         bool              `json:"tls"`
+	Path        string            `json:"path"`
+	SecretName  string            `json:"secretName,omitempty"`
+}
+
 // JiraSpec resource
 type JiraSpec struct {
-	// BaseImage image to use for a RethinkDB deployment.
-	BaseImage string `json:"base_image"`
+	// BaseImage image to use for a JIRA deployment.
+	BaseImage string `json:"baseImage"`
 
 	// BaseImageVersion is the version of base image to use.
-	BaseImageVersion string `json:"base_image_version"`
+	BaseImageVersion string `json:"baseImageVersion"`
 
 	// DataMountPath path for JIRA Home.
-	DataMountPath string `json:"data_mount_path"`
+	DataMountPath string `json:"dataMountPath"`
 
 	// ConfigMapName is the name of ConfigMap to use or create.
 	ConfigMapName string `json:"configMapName"`
@@ -74,12 +85,15 @@ type JiraSpec struct {
 	// SecretName is the name of Secret to use or create.
 	SecretName string `json:"secretName"`
 
-	// Pod defines the policy for pods owned by rethinkdb operator.
+	// Pod defines the policy for pods owned by JIRA operator.
 	// This field cannot be updated once the CR is created.
 	Pod *JiraPodPolicy `json:"pod,omitempty"`
+
+	// Ingress defines the Ingress policy for the JIRA operator.
+	Ingress *JiraIngressPolicy `json:"ingress,omitempty"`
 }
 
-// SetDefaults sets the default vaules for the cuberite spec and returns true if the spec was changed
+// SetDefaults sets the default vaules for the Jira spec and returns true if the spec was changed
 func (j *Jira) SetDefaults() bool {
 	changed := false
 	if len(j.Spec.BaseImage) == 0 {
@@ -91,7 +105,7 @@ func (j *Jira) SetDefaults() bool {
 		changed = true
 	}
 	if len(j.Spec.ConfigMapName) == 0 {
-		j.Spec.ConfigMapName = j.Name
+		j.Spec.ConfigMapName = j.ObjectMeta.Name
 		changed = true
 	}
 	if len(j.Spec.DataMountPath) == 0 {
@@ -99,16 +113,56 @@ func (j *Jira) SetDefaults() bool {
 		changed = true
 	}
 	if len(j.Spec.SecretName) == 0 {
-		j.Spec.SecretName = j.Name
+		j.Spec.SecretName = j.ObjectMeta.Name
+		changed = true
+	}
+	if j.SetIngressDefaults() {
 		changed = true
 	}
 	return changed
 }
 
+// SetIngressDefaults sets the default vaules for the Jira Ingress policy and returns true if the spec was changed.
+func (j *Jira) SetIngressDefaults() bool {
+	changed := false
+	if j.Spec.Ingress == nil {
+		return changed
+	}
+	if len(j.Spec.Ingress.Host) == 0 {
+		j.Spec.Ingress.Host = j.ObjectMeta.Name
+	}
+	if len(j.Spec.Ingress.Path) == 0 {
+		j.Spec.Ingress.Path = "/"
+	}
+	if len(j.Spec.Ingress.SecretName) == 0 {
+		j.Spec.Ingress.SecretName = fmt.Sprintf("%s-ingress", j.ObjectMeta.Name)
+		changed = true
+	}
+	return changed
+}
+
+// IsIngressEnabled shortcut fucntion to determine Ingress status.
+func (j *Jira) IsIngressEnabled() bool {
+	return j.Spec.Ingress != nil
+}
+
+// IsIngressTLSEnabled shortcut fucntion to determine Ingress TLS status.
+func (j *Jira) IsIngressTLSEnabled() bool {
+	if j.IsIngressEnabled() {
+		return j.Spec.Ingress.TLS
+	}
+	return false
+}
+
+// IsPodPolicySet shortcut fucntion to determine Pod policy status.
+func (j *Jira) IsPodPolicySet() bool {
+	return j.Spec.Pod != nil
+}
+
 // IsPVEnabled shortcut fucntion to determine PV status.
 func (j *Jira) IsPVEnabled() bool {
-	if podPolicy := j.Spec.Pod; podPolicy != nil {
-		return podPolicy.PersistentVolumeClaimSpec != nil
+	if j.IsPodPolicySet() {
+		return j.Spec.Pod.PersistentVolumeClaimSpec != nil
 	}
 	return false
 }
