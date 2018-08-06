@@ -19,8 +19,8 @@ import (
 	"os"
 	"runtime"
 
-	stub "github.com/jmckind/jira-operator/pkg/stub"
-	"github.com/jmckind/jira-operator/version"
+	stub "github.com/coreos/jira-operator/pkg/stub"
+	"github.com/coreos/jira-operator/version"
 	sdk "github.com/operator-framework/operator-sdk/pkg/sdk"
 	k8sutil "github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"

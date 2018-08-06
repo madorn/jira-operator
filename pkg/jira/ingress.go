@@ -19,8 +19,8 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
-	"github.com/jmckind/jira-operator/pkg/tls"
+	"github.com/coreos/jira-operator/pkg/apis/jira/v1alpha1"
+	"github.com/coreos/jira-operator/pkg/tls"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	extensions "k8s.io/api/extensions/v1beta1"

@@ -18,7 +18,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
+	"github.com/coreos/jira-operator/pkg/apis/jira/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

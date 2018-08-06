@@ -18,7 +18,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 
-	"github.com/jmckind/jira-operator/pkg/tls"
+	"github.com/coreos/jira-operator/pkg/tls"
 )
 
 var (

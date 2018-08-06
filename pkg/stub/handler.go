@@ -17,8 +17,8 @@ package stub
 import (
 	"context"
 
-	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
-	"github.com/jmckind/jira-operator/pkg/jira"
+	"github.com/coreos/jira-operator/pkg/apis/jira/v1alpha1"
+	"github.com/coreos/jira-operator/pkg/jira"
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 )

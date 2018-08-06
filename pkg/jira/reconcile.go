@@ -17,7 +17,7 @@ package jira
 import (
 	"errors"
 
-	"github.com/jmckind/jira-operator/pkg/apis/jira/v1alpha1"
+	"github.com/coreos/jira-operator/pkg/apis/jira/v1alpha1"
 	log "github.com/sirupsen/logrus"
 )
 

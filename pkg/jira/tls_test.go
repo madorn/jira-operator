@@ -17,7 +17,7 @@ package jira
 import (
 	"testing"
 
-	"github.com/jmckind/jira-operator/pkg/tls"
+	"github.com/coreos/jira-operator/pkg/tls"
 	"github.com/stretchr/testify/assert"
 )
 

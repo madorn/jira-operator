@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: jira-operator
-          image: jmckind/jira-operator:0.0.2
+          image: coreos/jira-operator:0.0.2
           command:
           - jira-operator
           imagePullPolicy: Always
