@@ -1,0 +1,97 @@
+apiVersion: app.coreos.com/v1alpha1
+kind: ClusterServiceVersion-v1
+metadata:
+  name: jiraoperator.v0.0.2-alpha.1
+  namespace: default
+spec:
+  displayName: Jira Software
+  description: |
+    Plan, track, and release world-class software with the #1 software development tool used by agile teams.
+  version: 0.0.2-alpha.1
+  maturity: alpha
+  replaces: jiraoperator.v0.0.1
+  maintainers:
+  - name: Red Hat, Inc
+    email: support@redhat.com
+  provider:
+    name: Red Hat, Inc
+    url: www.redhat.com
+  labels:
+    alm-owner-jira: jiraoperator
+    alm-status-descriptors: jiraoperator.v0.0.2-alpha.1
+  selector:
+    matchLabels:
+      alm-owner-jira: jiraoperator
+      operated-by: jiraoperator
+  links:
+  - name: Documentation
+    url: https://github.com/coreos/jira-operator/wiki
+  - name: Jira Operator Source Code
+    url: https://github.com/coreos/jira-operator
+  icon:
+  - base64data: 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
+    mediatype: image/png
+  install:
+    strategy: deployment
+    spec:
+      permissions:
+      - serviceAccountName: jira-operator
+        rules:
+        - apiGroups:
+          - "*"
+          resources:
+          - "*"
+          verbs:
+          - "*"
+      deployments:
+      - name: jira-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: jira-operator-alm-owned
+          template:
+            metadata:
+              name: jira-operator-alm-owned
+              labels:
+                name: jira-operator-alm-owned
+            spec:
+              serviceAccountName: jira-operator
+              containers:
+              - name: jira-operator
+                image: quay.io/coreos/jira-operator:0.0.2-alpha.1
+                command:
+                - jira-operator
+                imagePullPolicy: Always
+                env:
+                  - name: WATCH_NAMESPACE
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: metadata.namespace
+  customresourcedefinitions:
+    owned:
+    - name: jiras.app.redhat.com
+      version: v1alpha1
+      kind: Jira
+      displayName: Jira Software
+      description: Represents a deployment of Jira Software.
+      resources:
+        - kind: ConfigMap
+          version: v1
+        - kind: Ingress
+          version: extensions/v1beta1
+        - kind: PersistentVolumeClaim
+          version: v1
+        - kind: Pod
+          version: v1
+        - kind: Secret
+          version: v1
+        - kind: Service
+          version: v1
+      specDescriptors:
+        - description: The desired hostname for ingress to the Jira cluster.
+          displayName: Host
+          path: ingress.host
+        - description: Limits describes the minimum/maximum amount of compute resources required/allowed
+          displayName: Resource Requirements
+          path: pod.resources
