@@ -4,7 +4,7 @@ metadata:
   name: jiraoperator.v0.0.2-alpha.1
   namespace: default
 spec:
-  displayName: jira
+  displayName: Jira Software
   description: |
     Plan, track, and release world-class software with the #1 software development tool used by agile teams.
   version: 0.0.2-alpha.1
