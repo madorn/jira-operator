@@ -178,7 +178,7 @@ func newPodSpec(j *v1alpha1.Jira) v1.PodSpec {
 func podContainers(j *v1alpha1.Jira) []v1.Container {
 	return []v1.Container{{
 		Env:           containerEnv(j),
-		Image:         fmt.Sprintf("%s:%s", j.Spec.BaseImage, j.Spec.BaseImageVersion),
+		Image:         fmt.Sprintf("%s:%s", j.Spec.BaseImage, j.Spec.Version),
 		LivenessProbe: containerLivenessProbe(j),
 		Name:          DefaultContainerName,
 		Ports: []v1.ContainerPort{{
