@@ -75,6 +75,10 @@ func (r *Reconciler) Reconcile(jr *v1alpha1.Jira) (err error) {
 		return
 	}
 
+	if err = updateStatus(r.resource, r.sdk); err != nil {
+		return
+	}
+
 	log.Debugf("finished reconciling resource: %s", jr.ObjectMeta.Name)
 	return nil
 }
