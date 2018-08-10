@@ -171,4 +171,7 @@ func (j *Jira) IsPVEnabled() bool {
 type JiraStatus struct {
 	// ServiceName is the LB service for accessing Jira.
 	ServiceName string `json:"serviceName,omitempty"`
+
+	// Endpoint is the URI for accessing Jira.
+	Endpoint string `json:"endpoint,omitempty"`
 }

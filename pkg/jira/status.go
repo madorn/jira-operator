@@ -15,6 +15,7 @@
 package jira
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/coreos/jira-operator/pkg/apis/jira/v1alpha1"
@@ -24,6 +25,7 @@ import (
 func updateStatus(j *v1alpha1.Jira, s OperatorSDK) error {
 	status := v1alpha1.JiraStatus{
 		ServiceName: j.ObjectMeta.Name,
+		Endpoint:    formatEndpoint(j),
 	}
 
 	// don't update the status if there aren't any changes.
@@ -34,4 +36,20 @@ func updateStatus(j *v1alpha1.Jira, s OperatorSDK) error {
 	log.Debugf("updating status for resource: %s", j.Name)
 	j.Status = status
 	return s.Update(j)
+}
+
+func formatEndpoint(j *v1alpha1.Jira) string {
+	scheme := "http"
+	host := fmt.Sprintf("%s:%d", j.Name, DefaultServicePort)
+	path := "/"
+
+	if j.IsIngressEnabled() {
+		host = j.Spec.Ingress.Host
+		path = j.Spec.Ingress.Path
+	}
+	if j.IsIngressTLSEnabled() {
+		scheme = "https"
+	}
+
+	return fmt.Sprintf("%s://%s%s", scheme, host, path)
 }
