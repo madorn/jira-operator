@@ -146,6 +146,7 @@ func TestReconcileSetDefaultsNotChanged(t *testing.T) {
 
 	sdk := new(MockSDK)
 	sdk.On("Get", mock.Anything).Return(nil)
+	sdk.On("Update", mock.Anything).Return(nil)
 
 	r := NewReconciler(sdk)
 	err := r.Reconcile(jira)
