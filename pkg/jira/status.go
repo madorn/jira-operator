@@ -22,6 +22,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// updateStatus will update the status properties for the Jira resource.
 func updateStatus(j *v1alpha1.Jira, s OperatorSDK) error {
 	status := v1alpha1.JiraStatus{
 		ServiceName: j.ObjectMeta.Name,
@@ -38,6 +39,7 @@ func updateStatus(j *v1alpha1.Jira, s OperatorSDK) error {
 	return s.Update(j)
 }
 
+// formatEndpoint will return the URI for accessing the application.
 func formatEndpoint(j *v1alpha1.Jira) string {
 	scheme := "http"
 	host := fmt.Sprintf("%s:%d", j.Name, DefaultServicePort)
