@@ -24,10 +24,15 @@ import (
 const (
 	// DefaultBaseImage is the default docker image to use for JIRA Pods.
 	DefaultBaseImage = "cptactionhank/atlassian-jira-software"
+
 	// DefaultVersion is the default Jira version to use for JIRA Pods.
 	DefaultVersion = "7.10.2"
+
 	// DefaultDataMountPath is the default filesystem path for JIRA Home.
 	DefaultDataMountPath = "/var/atlassian/jira"
+
+	// DefaultIngressPath is the default path for the Ingress resource.
+	DefaultIngressPath = "/"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -132,7 +137,7 @@ func (j *Jira) SetIngressDefaults() bool {
 		j.Spec.Ingress.Host = j.ObjectMeta.Name
 	}
 	if len(j.Spec.Ingress.Path) == 0 {
-		j.Spec.Ingress.Path = "/"
+		j.Spec.Ingress.Path = DefaultIngressPath
 	}
 	if len(j.Spec.Ingress.SecretName) == 0 {
 		j.Spec.Ingress.SecretName = fmt.Sprintf("%s-ingress", j.ObjectMeta.Name)
