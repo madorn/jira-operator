@@ -43,7 +43,7 @@ func updateStatus(j *v1alpha1.Jira, s OperatorSDK) error {
 func formatEndpoint(j *v1alpha1.Jira) string {
 	scheme := "http"
 	host := fmt.Sprintf("%s:%d", j.Name, DefaultServicePort)
-	path := "/"
+	path := v1alpha1.DefaultIngressPath
 
 	if j.IsIngressEnabled() {
 		host = j.Spec.Ingress.Host
