@@ -174,9 +174,12 @@ func (j *Jira) IsPVEnabled() bool {
 
 // JiraStatus resource
 type JiraStatus struct {
+	// Endpoint is the URI for accessing Jira.
+	Endpoint string `json:"endpoint,omitempty"`
+
 	// ServiceName is the LB service for accessing Jira.
 	ServiceName string `json:"serviceName,omitempty"`
 
-	// Endpoint is the URI for accessing Jira.
-	Endpoint string `json:"endpoint,omitempty"`
+	// State is the current state for the Jira application (Initializing, Running, etc...).
+	State string `json:"state"`
 }

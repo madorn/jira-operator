@@ -20,24 +20,19 @@ import (
 
 	"github.com/coreos/jira-operator/pkg/apis/jira/v1alpha1"
 	log "github.com/sirupsen/logrus"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-// updateStatus will update the status properties for the Jira resource.
-func updateStatus(j *v1alpha1.Jira, s OperatorSDK) error {
-	status := v1alpha1.JiraStatus{
-		ServiceName: j.ObjectMeta.Name,
-		Endpoint:    formatEndpoint(j),
-	}
+const (
+	// StateAvailable inicates the Jira application is available for clients.
+	StateAvailable = "Available"
 
-	// don't update the status if there aren't any changes.
-	if reflect.DeepEqual(j.Status, status) {
-		return nil
-	}
+	// StateInitializing inicates the Jira application is initializing.
+	StateInitializing = "Initializing"
 
-	log.Debugf("updating status for resource: %s", j.Name)
-	j.Status = status
-	return s.Update(j)
-}
+	// StateUnavailable inicates the Jira application is unavailable for clients.
+	StateUnavailable = "Unavailable"
+)
 
 // formatEndpoint will return the URI for accessing the application.
 func formatEndpoint(j *v1alpha1.Jira) string {
@@ -54,4 +49,50 @@ func formatEndpoint(j *v1alpha1.Jira) string {
 	}
 
 	return fmt.Sprintf("%s://%s%s", scheme, host, path)
+}
+
+// jiraState will return the current state for the Jira application.
+func jiraState(j *v1alpha1.Jira, s OperatorSDK) string {
+	log.Debugf("begin determine state")
+	pod := newPod(j)
+	err := s.Get(pod)
+
+	if apierrors.IsNotFound(err) {
+		log.Debugf("pod not found: initializing")
+		return StateInitializing
+	} else if err != nil {
+		log.Errorf("unable to get pod: %v", err)
+		return StateUnavailable
+	}
+
+	if len(pod.Status.ContainerStatuses) > 0 {
+		if pod.Status.ContainerStatuses[0].Ready {
+			log.Debugf("pod ready: available")
+			return StateAvailable
+		} else {
+			log.Debugf("pod not ready: initializing")
+			return StateInitializing
+		}
+	}
+
+	log.Debugf("unable to determine state, inidacting unavailable...")
+	return StateUnavailable
+}
+
+// processStatus will process the status properties for the Jira resource.
+func processStatus(j *v1alpha1.Jira, s OperatorSDK) error {
+	status := v1alpha1.JiraStatus{
+		Endpoint:    formatEndpoint(j),
+		ServiceName: j.ObjectMeta.Name,
+		State:       jiraState(j, s),
+	}
+
+	// don't update the status if there aren't any changes.
+	if reflect.DeepEqual(j.Status, status) {
+		return nil
+	}
+
+	log.Debugf("updating status for resource: %s", j.Name)
+	j.Status = status
+	return s.Update(j)
 }

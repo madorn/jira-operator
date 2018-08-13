@@ -153,7 +153,7 @@ func TestReconcileSetDefaultsNotChanged(t *testing.T) {
 
 	assert.Nil(t, err)
 	sdk.AssertExpectations(t)
-	sdk.AssertNumberOfCalls(t, "Get", 6)
+	sdk.AssertNumberOfCalls(t, "Get", 7)
 }
 
 // TestReconcileHandlesNilObject verifies that a nil Jira value produces an error.
