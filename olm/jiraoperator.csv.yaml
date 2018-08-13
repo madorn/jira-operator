@@ -89,9 +89,13 @@ spec:
         - kind: Service
           version: v1
       specDescriptors:
-        - description: The desired hostname for ingress to the Jira cluster.
+        - description: The desired hostname for accessing the application.
           displayName: Host
           path: ingress.host
         - description: Limits describes the minimum/maximum amount of compute resources required/allowed
           displayName: Resource Requirements
           path: pod.resources
+      statusDescriptors:
+        - description: The URI for accessing the application.
+          displayName: Endpoint
+          path: endpoint

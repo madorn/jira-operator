@@ -48,6 +48,7 @@ func (r *Reconciler) Reconcile(jr *v1alpha1.Jira) (err error) {
 	changed := r.resource.SetDefaults()
 	if changed {
 		log.Debug("simulating initializer")
+		r.resource.Status.State = StateInitializing
 		return r.sdk.Update(r.resource)
 	}
 
@@ -72,6 +73,10 @@ func (r *Reconciler) Reconcile(jr *v1alpha1.Jira) (err error) {
 	}
 
 	if err = processIngress(r.resource, r.sdk); err != nil {
+		return
+	}
+
+	if err = processStatus(r.resource, r.sdk); err != nil {
 		return
 	}
 

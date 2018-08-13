@@ -24,10 +24,15 @@ import (
 const (
 	// DefaultBaseImage is the default docker image to use for JIRA Pods.
 	DefaultBaseImage = "cptactionhank/atlassian-jira-software"
-	// DefaultBaseImageVersion is the default version to use for JIRA Pods.
-	DefaultBaseImageVersion = "7.10.2"
+
+	// DefaultVersion is the default Jira version to use for JIRA Pods.
+	DefaultVersion = "7.10.2"
+
 	// DefaultDataMountPath is the default filesystem path for JIRA Home.
 	DefaultDataMountPath = "/var/atlassian/jira"
+
+	// DefaultIngressPath is the default path for the Ingress resource.
+	DefaultIngressPath = "/"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -73,8 +78,8 @@ type JiraSpec struct {
 	// BaseImage image to use for a JIRA deployment.
 	BaseImage string `json:"baseImage"`
 
-	// BaseImageVersion is the version of base image to use.
-	BaseImageVersion string `json:"baseImageVersion"`
+	// Version is the Jira version to deploy.
+	Version string `json:"version"`
 
 	// DataMountPath path for JIRA Home.
 	DataMountPath string `json:"dataMountPath"`
@@ -100,8 +105,8 @@ func (j *Jira) SetDefaults() bool {
 		j.Spec.BaseImage = DefaultBaseImage
 		changed = true
 	}
-	if len(j.Spec.BaseImageVersion) == 0 {
-		j.Spec.BaseImageVersion = DefaultBaseImageVersion
+	if len(j.Spec.Version) == 0 {
+		j.Spec.Version = DefaultVersion
 		changed = true
 	}
 	if len(j.Spec.ConfigMapName) == 0 {
@@ -132,7 +137,7 @@ func (j *Jira) SetIngressDefaults() bool {
 		j.Spec.Ingress.Host = j.ObjectMeta.Name
 	}
 	if len(j.Spec.Ingress.Path) == 0 {
-		j.Spec.Ingress.Path = "/"
+		j.Spec.Ingress.Path = DefaultIngressPath
 	}
 	if len(j.Spec.Ingress.SecretName) == 0 {
 		j.Spec.Ingress.SecretName = fmt.Sprintf("%s-ingress", j.ObjectMeta.Name)
@@ -169,5 +174,12 @@ func (j *Jira) IsPVEnabled() bool {
 
 // JiraStatus resource
 type JiraStatus struct {
-	// Fill me
+	// Endpoint is the URI for accessing Jira.
+	Endpoint string `json:"endpoint,omitempty"`
+
+	// ServiceName is the LB service for accessing Jira.
+	ServiceName string `json:"serviceName,omitempty"`
+
+	// State is the current state for the Jira application (Initializing, Running, etc...).
+	State string `json:"state"`
 }

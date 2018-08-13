@@ -128,7 +128,7 @@ func TestReconcileSetDefaultsNotChanged(t *testing.T) {
 	scName := "test-storage-class-name"
 	jira := new(v1alpha1.Jira)
 	jira.Spec.BaseImage = "test-base-image"
-	jira.Spec.BaseImageVersion = "test-base-image-version"
+	jira.Spec.Version = "test-base-image-version"
 	jira.Spec.ConfigMapName = "test-configmap-name"
 	jira.Spec.DataMountPath = "test-data-mount-path"
 	jira.Spec.Ingress = &v1alpha1.JiraIngressPolicy{
@@ -146,13 +146,14 @@ func TestReconcileSetDefaultsNotChanged(t *testing.T) {
 
 	sdk := new(MockSDK)
 	sdk.On("Get", mock.Anything).Return(nil)
+	sdk.On("Update", mock.Anything).Return(nil)
 
 	r := NewReconciler(sdk)
 	err := r.Reconcile(jira)
 
 	assert.Nil(t, err)
 	sdk.AssertExpectations(t)
-	sdk.AssertNumberOfCalls(t, "Get", 6)
+	sdk.AssertNumberOfCalls(t, "Get", 7)
 }
 
 // TestReconcileHandlesNilObject verifies that a nil Jira value produces an error.
@@ -167,7 +168,7 @@ func TestReconcileHandlesNilObject(t *testing.T) {
 func TestReconcileHandleConfigMapError(t *testing.T) {
 	jira := new(v1alpha1.Jira)
 	jira.Spec.BaseImage = "test"
-	jira.Spec.BaseImageVersion = "test"
+	jira.Spec.Version = "test"
 	jira.Spec.ConfigMapName = "test"
 	jira.Spec.DataMountPath = "test"
 	jira.Spec.SecretName = "test"
@@ -187,7 +188,7 @@ func TestReconcileHandleConfigMapError(t *testing.T) {
 func TestReconcileHandleIngressError(t *testing.T) {
 	jira := new(v1alpha1.Jira)
 	jira.Spec.BaseImage = "test"
-	jira.Spec.BaseImageVersion = "test"
+	jira.Spec.Version = "test"
 	jira.Spec.ConfigMapName = "test"
 	jira.Spec.DataMountPath = "test"
 	jira.Spec.SecretName = "test"
@@ -213,7 +214,7 @@ func TestReconcileHandleIngressError(t *testing.T) {
 func TestReconcileHandleIngressSecretError(t *testing.T) {
 	jira := new(v1alpha1.Jira)
 	jira.Spec.BaseImage = "test"
-	jira.Spec.BaseImageVersion = "test"
+	jira.Spec.Version = "test"
 	jira.Spec.ConfigMapName = "test"
 	jira.Spec.DataMountPath = "test"
 	jira.Spec.SecretName = "test"
@@ -239,7 +240,7 @@ func TestReconcileHandleIngressSecretError(t *testing.T) {
 func TestReconcileHandlePodError(t *testing.T) {
 	jira := new(v1alpha1.Jira)
 	jira.Spec.BaseImage = "test"
-	jira.Spec.BaseImageVersion = "test"
+	jira.Spec.Version = "test"
 	jira.Spec.ConfigMapName = "test"
 	jira.Spec.DataMountPath = "test"
 	jira.Spec.SecretName = "test"
@@ -260,7 +261,7 @@ func TestReconcileHandlePVCError(t *testing.T) {
 	scName := "test"
 	jira := new(v1alpha1.Jira)
 	jira.Spec.BaseImage = "test"
-	jira.Spec.BaseImageVersion = "test"
+	jira.Spec.Version = "test"
 	jira.Spec.ConfigMapName = "test"
 	jira.Spec.DataMountPath = "test"
 	jira.Spec.SecretName = "test"
@@ -285,7 +286,7 @@ func TestReconcileHandlePVCError(t *testing.T) {
 func TestReconcileHandleServiceError(t *testing.T) {
 	jira := new(v1alpha1.Jira)
 	jira.Spec.BaseImage = "test"
-	jira.Spec.BaseImageVersion = "test"
+	jira.Spec.Version = "test"
 	jira.Spec.ConfigMapName = "test"
 	jira.Spec.DataMountPath = "test"
 	jira.Spec.SecretName = "test"
