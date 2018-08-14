@@ -51,13 +51,15 @@ kubectl apply -f examples/jira-minimal.yaml
 ```
 
 This will create a minimal demo Jira instance, strictly for demonstration
-purposes. Have a look at the other [examples](examples/) as well.
+purposes.
 
 ```
 $ kubectl get jiras
 NAME           AGE
 jira-minimal   13s
 ```
+
+Have a look at the other [examples](examples/) as well.
 
 ## Development
 
