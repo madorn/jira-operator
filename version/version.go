@@ -16,5 +16,5 @@ package version
 
 var (
 	// Version application version
-	Version = "0.0.2+git"
+	Version = "0.0.2"
 )
