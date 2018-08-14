@@ -1,15 +1,15 @@
 apiVersion: app.coreos.com/v1alpha1
 kind: ClusterServiceVersion-v1
 metadata:
-  name: jiraoperator.v0.0.2-alpha.2
+  name: jiraoperator.v0.0.2
   namespace: default
 spec:
   displayName: Jira Software
   description: |
     Plan, track, and release world-class software with the #1 software development tool used by agile teams.
-  version: 0.0.2-alpha.2
+  version: 0.0.2
   maturity: alpha
-  replaces: jiraoperator.v0.0.2-alpha.1
+  replaces: jiraoperator.v0.0.1
   maintainers:
   - name: Red Hat, Inc
     email: support@redhat.com
@@ -18,7 +18,7 @@ spec:
     url: www.redhat.com
   labels:
     alm-owner-jira: jiraoperator
-    alm-status-descriptors: jiraoperator.v0.0.2-alpha.2
+    alm-status-descriptors: jiraoperator.v0.0.2
   selector:
     matchLabels:
       alm-owner-jira: jiraoperator
@@ -59,7 +59,7 @@ spec:
               serviceAccountName: jira-operator
               containers:
               - name: jira-operator
-                image: quay.io/coreos/jira-operator:0.0.2-alpha.2
+                image: quay.io/coreos/jira-operator:0.0.2
                 command:
                 - jira-operator
                 imagePullPolicy: Always
