@@ -13,7 +13,7 @@ dep ensure -v
 Start the operator out-of-cluster.
 
 ```
-LOG_LEVEL="debug" operator up local --namespace <namespace-to-watch> --kubeconfig <path-to-kubeconfig>
+LOG_LEVEL="debug" operator-sdk up local --namespace <namespace-to-watch> --kubeconfig <path-to-kubeconfig>
 ```
 
 ## In-Cluster
